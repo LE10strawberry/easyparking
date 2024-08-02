@@ -3,10 +3,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
-
+# PYTHON 连接 MySQL  MySQL或PostgreSQL的连接方法如下:(还有一种方式见桌面文件夹EPS)
 # SQLALCHEMY_DATABASE_URL = 'sqlite:///./coronavirus.sqlite3'
 # SQLALCHEMY_DATABASE_URL = "postgresql://username:password@host:port/database_name"
-# MySQL或PostgreSQL的连接方法如下
+# password代表的是(连接的使用者密码)711004szheli,user代表的是(连接的使用者名称)127.0.0.1
+# port代表的是(连接的通道,也就是打开MySQL后,MySQL Connections下面的小灰框里面localhost显示的东西)3306,host代表的是(MySQL的位置,也就是'本机')easyparkingsystem
 SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:711004szheli@127.0.0.1:3306/easyparkingsystem"
 
 engine = create_engine(

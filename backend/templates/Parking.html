@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parking Management System</title>
+    <script src="{{ url_for('static', path='/jquery-3.5.1/jquery-3.5.1.min.js') }}"></script>
+    <style>
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+
+        .header .center-link {
+            margin: 0 10px; /* Adjust margin as needed for spacing */
+        }
+
+        .header .right-link {
+            position: absolute;
+            right: 0;
+            margin-right: 10px; /* Adjust margin as needed for spacing */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .section {
+            margin-bottom: 50px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .search-form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-form input[type="text"], .search-form input[type="number"] {
+            padding: 5px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .search-form button {
+            padding: 5px 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="text"], .form-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <a href="/easyparking/location_page" class="center-link">Location</a>
+    <a href="/easyparking/parking_page" class="center-link">Parking</a>
+    <a href="/easyparking/user_page">User</a>
+    <a href="/easyparking/logout" class="right-link" id="logout">Logout<span id="username"></span><span id="userRole"></span></a>
+</div>
+<div class="container">
+    <!-- Display according to user type -->
+
+        <div class="section" id="check-in-section">
+             <h5 style="color: red" id="message-check-in"></h5>
+        <h2>Parking Check-In for User (Admin)</h2>
+        <form method="get" action="" id="checkInForUserForm">
+            <input  type="hidden" name="check_in_type" value="admin">
+
+            <div class="form-group">
+                <label for="check_in_user_name">Select User：</label>
+                <select id="check_in_user_name" name="check_in_user_name">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="check_in_user_name">Select Location：</label>
+                <select id="check_in_location_name" name="check_in_location_name">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="hidden"  id="cost_per_hour" name="cost_per_hour" value="">
+            </div>
+
+
+            <div class="form-group">
+                <button type="submit" name="check_in_submit">Check In</button>
+            </div>
+        </form>
+        </div>
+
+    <!-- Parking Processing Section -->
+    <div class="section" id="processing-section">
+        <h2>Parking Processing</h2>
+        <h5 style="color: red">message</h5>
+        <div class="search-form">
+            <form method="post" action="" id="checkedInForm">
+<!--                <input  type="hidden" name="source" value="processing">-->
+                <label for="id_checked_in">Order Id：</label>
+                <input type="text" id="id_checked_in" name="id">
+                <label for="user_checked_in">User Name：</label>
+                <input type="text" id="user_checked_in" name="user">
+                <label for="location_checked_in">Parking Location：</label>
+                <input type="text" id="location_checked_in" name="location">
+<!--                <label for="description">Description：</label>-->
+<!--                <input type="text" id="location" name="description">-->
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>Parking Location ID</th>
+                <th>Parking Location</th>
+                <th>Check-In Time</th>
+                <th>Order Status</th>
+                <th>Created At</th>
+                <th>Operation</th>
+            </tr>
+<!--             PHP code to fetch and display data from the database for Parking Processing-->
+            <tbody id="checkedInBody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Parking History Section -->
+    <div class="section" id="history-section">
+        <h2>Parking History</h2>
+        <h5 style="color: red">message</h5>
+
+        <div class="search-form">
+            <form method="post" action="" id="checkedOutForm">
+                <label for="id_checked_out">Order Id：</label>
+                <input type="text" id="id_checked_out" name="id">
+                <label for="user_checked_out">User Name：</label>
+                <input type="text" id="user_checked_out" name="user">
+                <label for="location_checked_out">Parking Location：</label>
+                <input type="text" id="location_checked_out" name="location">
+<!--                <label for="description">Description：</label>-->
+<!--                <input type="text" id="location" name="description">-->
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>Parking Location ID</th>
+                <th>Parking Location</th>
+                <th>Check-In Time</th>
+                <th>Parking Hours</th>
+                <th>Check-Out Time</th>
+                <th>Cost per Hour</th>
+                <th>Total Cost</th>
+                <th>Order Status</th>
+                <th>Created At</th>
+            </tr>
+<!--            PHP code to fetch and display data from the database for Parking History-->
+           <tbody id="checkedOutBody">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    // 从 localStorage 中获取用户信息
+    let user = JSON.parse(localStorage.getItem("user"));
+    let username = null;
+    let userRole = null;
+    // 显示用户信息
+    if (user) {
+        username = user.name;
+        userRole = user.user_type;
+        document.getElementById("username").textContent = "(" + user.name;
+        document.getElementById("userRole").textContent = " - " + user.user_type + ")";
+    }
+
+    $(document).ready(function () {
+        // get location list for admin check-in
+        $.ajax({
+                    url: '/easyparking/search_locations?'+'location_name=&description=&available_status=all',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#message').html("success");
+
+                        // 清空表格数据
+                        $('#locationTableBody').empty();
+
+                        // check response is not empty
+                        if (response.length > 0) {
+                            response.forEach(function(item) {
+                                // append the location name to the select
+                                $('#check_in_location_name').append($('<option>', {
+                                    value: item.id,
+                                    text: item.location
+                                }));
+
+                                // append the cost per hour to the hidden input
+                                $('#cost_per_hour').val(item.cost_per_hour);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#message').html(xhr.responseText);
+                    }
+        });
+
+        // get user list for admin check-in
+        $.ajax({
+                    url: '/easyparking/search_users_for_check_in?user_type=all',
+                    type: 'GET',
+                    data: null,
+                    success: function(response) {
+                        $('#message').html("success");
+
+                        // 清空表格数据
+                        $('#locationTableBody').empty();
+
+                        // check response is not empty
+                        if (response.length > 0) {
+                            response.forEach(function(item) {
+                                // append the user name to the select
+                                $('#check_in_user_name').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name + ' ' + item.surname
+                                }));
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#message').html(xhr.responseText);
+                    }
+        });
+
+
+        const formData = {
+            id: $('#id_checked_in').val(),
+            username: $('#user_checked_in').val(),
+            location: $('#location_checked_in').val()
+        };
+
+        $('#checkedInForm').submit(function (event) {
+            event.preventDefault(); // 阻止表单默认提交行为
+            // 发送Ajax请求
+            $.ajax({
+                type: 'POST',
+                url: '/easyparking/search_checked_in',
+                data: formData,
+                success: function (response) {
+                    // 清空表格数据
+                    $('#checkedInBody').empty();
+
+                    // check response is not empty
+                    if (response.length > 0) {
+                        response.forEach(function (item) {
+
+                            var newRow = '<tr>' +
+                                '<td>' + item.id + '</td>' +
+                                '<td>' + item.user_id + '</td>' +
+                                '<td>' + item.username + '</td>' +
+                                '<td>' + item.parking_location_id + '</td>' +
+                                '<td>' + item.parking_location + '</td>' +
+                                '<td>' + item.check_in_time + '</td>' +
+                                '<td>' + item.order_status + '</td>' +
+                                '<td>' + item.created_at + '</td>' ;
+                            newRow = newRow + "<td><a href=/easyparking/check_in_for_parking?id="+ item.id +">Check-In</a></tr>"
+                            $('#checkedInBody').append(newRow);
+                        });
+                    }
+                },
+                error: function (error) {
+                    // 处理错误响应
+                    console.error('Error:', error);
+                }
+            });
+        });
+        $('#checkedInForm').trigger('submit');
+
+        $('#checkedInForm').on('submit', function (event) {
+            event.preventDefault();
+            const formData = {
+                id: $('#id_checked_in').val(),
+                username: $('#user_checked_in').val(),
+                location: $('#location_checked_in').val()
+            };
+
+            $.ajax({
+                url: '/easyparking/search_checked_in',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // 清空表格数据
+                    $('#checkedInBody').empty();
+
+                    // check response is not empty
+                    if (response.length > 0) {
+                        response.forEach(function (item) {
+                            var newRow = '<tr>' +
+                                '<td>' + item.id + '</td>' +
+                                '<td>' + item.user_id + '</td>' +
+                                '<td>' + item.username + '</td>' +
+                                '<td>' + item.parking_location_id + '</td>' +
+                                '<td>' + item.parking_location + '</td>' +
+                                '<td>' + item.check_in_time + '</td>' +
+                                '<td>' + item.order_status + '</td>' +
+                                '<td>' + item.created_at + '</td>' ;
+                            newRow = newRow + "<td><a href=/easyparking/check_in_for_parking?id="+ item.id +">Check-In</a></tr>"
+                            $('#checkedInBody').append(newRow);
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#message').html(xhr.responseText);
+                }
+            });
+        });
+
+
+        //checked-out parking order
+        const checkedOutformData = {
+            id: $('#id_checked_out').val(),
+            username: $('#user_checked_out').val(),
+            location: $('#location_checked_out').val()
+        };
+
+        $('#checkedOutForm').submit(function (event) {
+            event.preventDefault(); // 阻止表单默认提交行为
+
+            // 发送Ajax请求
+            $.ajax({
+                type: 'POST',
+                url: '/easyparking/search_checked_out',
+                data: checkedOutformData,
+                success: function (response) {
+                    // 清空表格数据
+                    $('#checkedOutBody').empty();
+
+                    // check response is not empty
+                    if (response.length > 0) {
+                        response.forEach(function (item) {
+
+                           var newRow = '<tr>' +
+                                '<td>' + item.id + '</td>' +
+                                '<td>' + item.user_id + '</td>' +
+                                '<td>' + item.username + '</td>' +
+                                '<td>' + item.parking_location_id + '</td>' +
+                                '<td>' + item.parking_location + '</td>' +
+                                '<td>' + item.check_in_time + '</td>' +
+                                '<td>' + item.packing_hours + '</td>' +
+                                '<td>' + item.check_out_time + '</td>' +
+                                '<td>' + item.cost_per_hour + '</td>' +
+                                '<td>' + item.total_cost + '</td>' +
+                                '<td>' + item.order_status + '</td>' +
+                                '<td>' + item.created_at + '</td>' +
+                                '</tr>';
+                            $('#checkedOutBody').append(newRow);
+                        });
+                    }
+                },
+                error: function (error) {
+                    // 处理错误响应
+                    console.error('Error:', error);
+                }
+            });
+        });
+        $('#checkedOutForm').trigger('submit');
+
+        $('#checkedOutForm').on('submit', function (event) {
+            event.preventDefault();
+
+            const checkedOutformData = {
+                id: $('#id_checked_out').val(),
+                username: $('#user_checked_out').val(),
+                location: $('#location_checked_out').val()
+             };
+
+            $.ajax({
+                url: '/easyparking/search_checked_out',
+                type: 'POST',
+                data: checkedOutformData,
+                success: function (response) {
+                    // 清空表格数据
+                    $('#checkedOutBody').empty();
+
+                    // check response is not empty
+                    if (response.length > 0) {
+                        response.forEach(function (item) {
+                            var newRow = '<tr>' +
+                                '<td>' + item.id + '</td>' +
+                                '<td>' + item.user_id + '</td>' +
+                                '<td>' + item.username + '</td>' +
+                                '<td>' + item.parking_location_id + '</td>' +
+                                '<td>' + item.parking_location + '</td>' +
+                                '<td>' + item.check_in_time + '</td>' +
+                                '<td>' + item.packing_hours + '</td>' +
+                                '<td>' + item.check_out_time + '</td>' +
+                                '<td>' + item.cost_per_hour + '</td>' +
+                                '<td>' + item.total_cost + '</td>' +
+                                '<td>' + item.order_status + '</td>' +
+                                '<td>' + item.created_at + '</td>' +
+                                '</tr>';
+                            $('#checkedOutBody').append(newRow);
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#message').html(xhr.responseText);
+                }
+            });
+        });
+
+        $('#check-in-section').on('submit', function (event) {
+                event.preventDefault();
+                const check_in_data = {
+                    user_id: parseInt($('#check_in_user_name option:selected').val(), 10),
+                    user_name: $('#check_in_user_name  option:selected').text(),
+                    parking_location_id: parseInt($('#check_in_location_name  option:selected').val(), 10),
+                    parking_location_name: $('#check_in_location_name  option:selected').text(),
+                    cost_per_hour: parseFloat($('#cost_per_hour').val(), 10),
+                    check_in_type: 'admin'
+                };
+
+                const check_in_data_str = "user_id=" + parseInt($('#check_in_user_name option:selected').val(), 10) +
+                          "&user_name=" + $('#check_in_user_name  option:selected').text() +
+                          "&parking_location_id=" + parseInt($('#check_in_location_name  option:selected').val(), 10) +
+                          "&parking_location_name=" + $('#check_in_location_name  option:selected').text() +
+                          "&cost_per_hour=" + parseFloat($('#cost_per_hour').val(), 10) +
+                          "&check_in_type=" + 'admin';
+
+
+                $.ajax({
+                    url: '/easyparking/checked_in',
+                    // type: 'POST',
+                    // contentType: 'application/json',
+                    // data: JSON.stringify(check_in_data),
+                    type: 'GET',
+                    data: check_in_data_str,
+                    success: function(response) {
+                          // check response is not empty
+                         $('#message-check-in').append(response);
+                    },
+                    error: function(xhr, status, error) {
+                        $('message-check-in').html(xhr.responseText);
+                    }
+                });
+            });
+    });
+
+
+</script>
+</body>
+</html>

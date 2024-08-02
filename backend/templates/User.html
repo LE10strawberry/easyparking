@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Parking System - User Management</title>
+    <script src="{{ url_for('static', path='/jquery-3.5.1/jquery-3.5.1.min.js') }}"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+
+        .header .center-link {
+            margin: 0 10px; /* Adjust margin as needed for spacing */
+        }
+
+        .header .right-link {
+            position: absolute;
+            right: 0;
+            margin-right: 10px; /* Adjust margin as needed for spacing */
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .content {
+             /*top center*/
+            text-align: top  */;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <a href="/easyparking/location_page" class="center-link">Location</a>
+    <a href="/easyparking/parking_page" class="center-link">Parking</a>
+    <a href="/easyparking/user_page">User</a>
+    <a href="/easyparking/logout" class="right-link" id="logout">Logout<span id="username"></span><span id="userRole"></span></a>
+</div>
+<div class="container">
+    <div class="content">
+        <h2>User Searching (Admin)</h2>
+
+        <form action="" method="post" id="userForm">
+            <label for="id">Id：</label>
+            <input type="text" id="id" name="id">
+            <label for="name">Name：</label>
+            <input type="text" id="name" name="name">
+            <label for="surname">Surname：</label>
+            <input type="text" id="surname" name="surname">
+            <label for="phone">Phone：</label>
+            <input type="text" id="phone" name="phone">
+            <label for="email">Email：</label>
+            <input type="text" id="email" name="email">
+            <label for="user_type">User Type：</label>
+            <select id="user_type" name="user_type">
+                <option value="all">all</option>
+                <option value="User">User</option>
+                <option value="Administrator">Administrator</option>
+            </select>
+            <input type="submit" value="search">
+        </form>
+        <table>
+            <thead>
+                <tr><th>Id</th><th>Name</th><th>Surname</th><th>Phone</th><th>Email</th><th>User Type</th><th>Created At</th></tr>
+            </thead>
+            <tbody id="userTableBody">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        // 从 localStorage 中获取用户信息
+        let user = JSON.parse(localStorage.getItem("user"));
+        let username = null;
+        let userRole = null;
+
+        // 显示用户信息
+        if (user) {
+            username=user.name;
+            userRole=user.user_type;
+            document.getElementById("username").textContent = "(" + user.name;
+            document.getElementById("userRole").textContent = " - " + user.user_type + ")";
+        }
+
+        //TODO：添加登出逻辑 localStorage.removeItem("user");
+
+
+        $(document).ready(function () {
+            const formData = {
+                id: $('#id').val(),
+                name: $('#name').val(),
+                Surname: $('#surname').val(),
+                phone: $('#phone').val(),
+                email: $('#email').val(),
+                user_type: $('#user_type').val()
+            };
+
+            $('#userForm').submit(function(event) {
+                event.preventDefault(); // 阻止表单默认提交行为
+
+                var formData = $(this).serialize(); // 序列化表单数据
+
+                // 发送Ajax请求
+                $.ajax({
+                    type: 'POST',
+                    url: '/easyparking/search_users',
+                    data: formData,
+                    success: function (response) {
+                        // 清空表格数据
+                            $('#userTableBody').empty();
+
+                            // check response is not empty
+                            if (response.length > 0) {
+                                response.forEach(function (user) {
+
+                                    var newRow = '<tr>' +
+                                            '<td>' + user.id + '</td>' +
+                                            '<td>' + user.name + '</td>' +
+                                            '<td>' + user.surname + '</td>' +
+                                            '<td>' + user.phone + '</td>' +
+                                            '<td>' + user.email + '</td>' +
+                                            '<td>' + user.user_type + '</td>' +
+                                            '<td>' + user.created_at + '</td>' +
+                                            '</tr>';
+                                    $('#userTableBody').append(newRow);
+                                });
+                            }
+                    },
+                    error: function (error) {
+                        // 处理错误响应
+                        console.error('Error:', error);
+                    }
+                });
+            });
+            $('#userForm').trigger('submit');
+
+            $('#userForm').on('submit', function (event) {
+                event.preventDefault();
+                const formData = {
+                    id: $('#id').val(),
+                    name: $('#name').val(),
+                    surname: $('#surname').val(),
+                    phone: $('#phone').val(),
+                    email: $('#email').val(),
+                    user_type: $('#user_type').val()
+                };
+
+                $.ajax({
+                    url: '/easyparking/search_users',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        // 清空表格数据
+                        $('#userTableBody').empty();
+
+                        // check response is not empty
+                        if (response.length > 0) {
+                            response.forEach(function (user) {
+                                var newRow = '<tr>' +
+                                            '<td>' + user.id + '</td>' +
+                                            '<td>' + user.name + '</td>' +
+                                            '<td>' + user.surname + '</td>' +
+                                            '<td>' + user.phone + '</td>' +
+                                            '<td>' + user.email + '</td>' +
+                                            '<td>' + user.user_type + '</td>' +
+                                            '<td>' + user.created_at + '</td>' +
+                                            '</tr>';
+                                $('#userTableBody').append(newRow);
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#message').html(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

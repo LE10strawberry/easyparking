@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Easy Parking System</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{{ url_for('static', path='/jquery-3.5.1/jquery-3.5.1.min.js') }}"></script>
+     <script>
+        $(document).ready(function () {
+            $('#loginForm').on('submit', function(event) {
+                event.preventDefault();
+                const formData = {
+                    email: $('#email').val(),
+                    password: $('#password').val()
+                };
+
+                $.ajax({
+                    url: '/easyparking/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        $('#message').html("success");
+
+                        // save user info to local storage
+                        let user = {
+                            id: response.id,
+                            name: response.name + " " + response.surname,
+                            email: response.email,
+                            user_type: response.user_type
+                        };
+                        localStorage.setItem("user", JSON.stringify(user));
+
+                        window.location.replace('/easyparking/location_page');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#message').html(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 300px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .container form label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .container form input[type="text"],
+        .container form input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .container form input[type="submit"] {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .container form input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .container p {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Easy Parking System</h1>
+    <h5 style="color: red" id="message"></h5>
+    <form action="" method="post" id="loginForm">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" required><br>
+        <label for="password">Password:</label>
+<!--        The all users' password provided in the User table are all admin-->
+        <input type="password" id="password" name="password" required placeholder="admin"><br>
+        <input type="submit" value="Login">
+    </form>
+    <p>Don't have an account? <a href="register_page">Register here</a></p>
+</div>
+</body>
+</html>

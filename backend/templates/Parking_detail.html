@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-Out Information</title>
+    <script src="{{ url_for('static', path='/jquery-3.5.1/jquery-3.5.1.min.js') }}"></script>
+    <style>
+        /*body {*/
+        /*    font-family: Arial, sans-serif;*/
+        /*    display: flex;*/
+        /*    justify-content: center;*/
+        /*    align-items: center;*/
+        /*    height: 100vh;*/
+        /*    margin: 0;*/
+        /*    background-color: #f4f4f4;*/
+        /*}*/
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+                justify-content: center;
+                align-items: center;
+        }
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+
+        .header .center-link {
+            margin: 0 10px; /* Adjust margin as needed for spacing */
+        }
+
+        .header .right-link {
+            position: absolute;
+            right: 0;
+            margin-right: 10px; /* Adjust margin as needed for spacing */
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            background-color: #ffffff;
+            text-align: center;
+            /*display: flex;*/
+            /*display: flex;*/
+            flex-direction: column;
+            align-items: center
+            justify-content: center;
+        }
+        /*.container {*/
+        /*    display: flex;*/
+        /*    flex-direction: column;*/
+        /*    align-items: center*/
+        /*    justify-content: center;*/
+        /*    min-height: 100vh;*/
+        /*}*/
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .info div {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .info div span {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .info div:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <a href="/easyparking/location_page" class="center-link">Location</a>
+    <a href="/easyparking/parking_page" class="center-link">Parking</a>
+    <a href="/easyparking/user_page">User</a>
+    <a href="/easyparking/logout" class="right-link" id="logout">Logout<span id="username"></span><span id="userRole"></span></a>
+</div>
+<div class="container">
+    <h1>Check-Out Information</h1>
+    <div class="info">
+        <?php
+        include("../model/ParkingRecord.php");
+
+        if (!isset($_SESSION['ParkingRecordDetail'])) {
+            die("Parking record information is not available.");
+        }
+
+        $checkoutData =  unserialize($_SESSION["ParkingRecordDetail"]);
+        ?>
+        <div><span>ID:</span> <?php echo htmlspecialchars($checkoutData->getId()); ?></div>
+        <div><span>User ID:</span> <?php echo $checkoutData->getUserId(); ?></div>
+        <div><span>Username:</span> <?php echo htmlspecialchars($checkoutData->getUsername()); ?></div>
+        <div><span>Parking Location ID:</span> <?php echo htmlspecialchars($checkoutData->getParkingLocationId()); ?></div>
+        <div><span>Parking Location:</span> <?php echo htmlspecialchars($checkoutData->getParkingLocation()); ?></div>
+        <div><span>Check-In Time:</span> <?php echo htmlspecialchars($checkoutData->getCheckInTime()); ?></div>
+        <div><span>Parking Hours:</span> <?php echo htmlspecialchars($checkoutData->getParkingHours()); ?></div>
+        <div><span>Check-Out Time:</span> <?php echo htmlspecialchars($checkoutData->getCheckOutTime()); ?></div>
+        <div><span>Cost Per Hour:</span> <?php echo number_format($checkoutData->getCostPerHour(), 2); ?></div>
+        <div><span>Total Cost:</span> <?php echo number_format($checkoutData->getTotalCost(), 2); ?></div>
+        <div><span>Order Status:</span> <?php echo htmlspecialchars($checkoutData->getOrderStatus()); ?></div>
+        <div><span>Created At:</span> <?php echo $checkoutData->getCreatedAt(); ?></div>
+    </div>
+</div>
+</body>
+</html>
